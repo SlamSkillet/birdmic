@@ -1,0 +1,10 @@
+[Unit]
+Description=Records 15 seconds of audio
+
+[Service]
+Type=simple
+User=sam
+ExecStart=/etc/systemd/system/birdaudio-record-clip.sh
+
+[Install]
+WantedBy=default.target

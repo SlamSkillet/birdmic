@@ -1,0 +1,16 @@
+[Unit]
+Description=Records 15 seconds of audio every minute
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+Persistent=false
+# Run right away
+OnBootSec=0
+# Run every 1 minute thereafter
+OnUnitActiveSec=60
+# File describing job to execute
+Unit=birdaudio-record-clip.service
+
+[Install]
+WantedBy=timers.target
