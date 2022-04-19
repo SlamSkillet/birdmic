@@ -1,0 +1,10 @@
+[Unit]
+Description=Removes recordings in /processed folder
+
+[Service]
+Type=simple
+User=sam
+ExecStart=/etc/systemd/system/birdaudio-cleanup-disk.sh
+
+[Install]
+WantedBy=default.target

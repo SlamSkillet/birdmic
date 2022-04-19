@@ -3,8 +3,14 @@ import math
 import numpy as np
 import operator
 import os
+import shutil
 import tflite_runtime.interpreter as tflite
 import time
+
+from datetime import datetime, timezone
+from dotenv import load_dotenv
+from pathlib import Path
+from pymongo import MongoClient
 
 os.environ['CUDA_VISIBLE_DEVICES'] = ''
 
@@ -20,14 +26,44 @@ BASE_DIR = '/home/sam/birdaudio'
 MODEL_DIR = f'{BASE_DIR}/model'
 RECORDINGS_DIR = f'{BASE_DIR}/recordings'
 
+load_dotenv()
+
 def main():
   global INTERPRETER
+  global MONGO_CLIENT
+
+  MONGO_DB_USER_PASS = os.getenv('MONGO_DB_USER_PASS')
 
   INTERPRETER = load_model()
-  chunks = read_audio_data(f'{RECORDINGS_DIR}/deck/2022-04-06-01:33:54.wav')
-  detections = analyze_audio_data(chunks)
-  observations = parse_detections(detections)
-  print(observations)
+  client = MongoClient(f'mongodb+srv://raspberrypi:{MONGO_DB_USER_PASS}@deckrecordings.hv661.mongodb.net/observations?retryWrites=true&w=majority')
+  collection = client.observations.entries
+  
+  # Loop through /deck folder
+  for audio_file in Path(f'{RECORDINGS_DIR}/deck').iterdir():
+    chunks = read_audio_data(audio_file)
+    detections = analyze_audio_data(chunks)
+    observations = parse_detections(detections)
+
+    # Save to mongo
+    docs = []
+    for entry in observations:
+      date_string = audio_file.name.replace('.wav', '')
+      date = datetime.strptime(date_string, '%Y-%m-%d-%H:%M:%S-%z')
+      docs.append({
+        "species": entry[0],
+        "confidence": entry[1].item(),
+        "recordedAt": date,
+        "filename": audio_file.name
+      })
+
+    if len(docs) > 0:
+      print('Saving entries to mongo...', docs)
+      collection.insert_many(docs)
+
+    # Randomly sample for upload to S3?
+
+    # Move to /processed folder
+    shutil.move(audio_file, f'{RECORDINGS_DIR}/processed')
 
 def load_model():
 
@@ -56,8 +92,6 @@ def load_model():
     with open(f'{MODEL_DIR}/labels.txt', 'r') as lfile:
         for line in lfile.readlines():
             CLASSES.append(line.replace('\n', ''))
-
-    print('DONE!', input_details)
 
     return myinterpreter
 

@@ -1,0 +1,13 @@
+[Unit]
+Description=Cleans up audio recordings every 10 minutes
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+Persistent=false
+OnBootSec=0
+OnUnitActiveSec=600
+Unit=birdaudio-cleanup-disk.service
+
+[Install]
+WantedBy=timers.target

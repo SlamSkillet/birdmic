@@ -1,0 +1,13 @@
+[Unit]
+Description=Runs inference every 5 minutes
+RefuseManualStart=no
+RefuseManualStop=no
+
+[Timer]
+Persistent=false
+OnBootSec=0
+OnUnitActiveSec=300
+Unit=birdaudio-analyze.service
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,10 @@
+[Unit]
+Description=Runs inference, saves to db, uploads to static storage
+
+[Service]
+Type=simple
+User=sam
+ExecStart=/etc/systemd/system/birdaudio-analyze.sh
+
+[Install]
+WantedBy=default.target
