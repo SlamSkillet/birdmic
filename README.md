@@ -1,3 +1,7 @@
+# Sam's Backyard Bird Mic
+
+Adapted from https://github.com/kahst/BirdNET
+
 ### Install tflite from wheel
 
 ```
